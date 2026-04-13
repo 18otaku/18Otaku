@@ -1,131 +1,32 @@
-<header class="neek-header w-full bg-[#000] border-b border-gray-800 md:fixed md:top-0 md:left-0 md:right-0 z-50">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between min-h-[56px]">
+<!-- Navigation -->
+<nav class="fixed top-0 w-full z-50 glass">
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        .glass-hover:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
 
-    <!-- Logo -->
-    <a href="index.html" class="flex items-center gap-3" aria-label="Home">
-      <img src="https://github.com/18otaku/18Otaku/blob/main/assets/images/18otaku.png?raw=true"
-           alt="18Otaku logo" class="h-10 object-contain max-h-11" />
-    </a>
-
-    <!-- Desktop Navigation -->
-    <nav class="hidden md:flex gap-6 text-sm font-medium">
-      <a class="neek-link" href="/movies/index.html">Switch to Movies</a>
-      <a class="neek-link" href="/anime/index.html">Home</a>
-      <a class="neek-link" href="/anime/popular.html">Popular</a>
-      <a class="neek-link" href="/anime/latest.html">Latest</a>
-      <a class="neek-link" href="/anime/library.html">Library</a>
-    </nav>
-
-    <!-- Desktop Search -->
-    <div class="hidden md:flex">
-      <form action="/anime/search.html" method="get" class="relative w-72">
-        <input name="q" type="text" placeholder="Search anime..."
-               class="w-full rounded-xl bg-[#1a1a1a] border border-gray-700 px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#ff4444]" />
-        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
-      </form>
+        .line-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+    </style>
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="text-2xl font-bold tracking-wider">
+            <span class="text-white">18</span><span style="color: #ff4444;">OTAKU</span>
+        </div>
+        <div class="hidden md:flex gap-8 text-gray-300">
+            <a href="#new" class="hover:text-accent transition" style="color: inherit;">New</a>
+            <a href="#airing" class="hover:text-accent transition" style="color: inherit;">Airing</a>
+            <a href="#popular" class="hover:text-accent transition" style="color: inherit;">Popular</a>
+        </div>
     </div>
-  </div>
-
-  <!-- Mobile Navigation -->
-  <nav class="neek-mobile-nav md:hidden fixed bottom-0 left-0 right-0 bg-black/70 backdrop-blur-lg border-t border-gray-800 flex justify-around text-xs py-2 z-50">
-
-    <a class="neek-link flex flex-col items-center" href="/movies/index.html">
-      <i class="fa-solid fa-exchange-alt"></i>
-      <span class="mt-1 text-[10px]">Movies</span>
-    </a>
-
-    <a class="neek-link flex flex-col items-center" href="/anime/index.html">
-      <i class="fa-solid fa-home"></i>
-      <span class="mt-1 text-[10px]">Home</span>
-    </a>
-
-    <a class="neek-link flex flex-col items-center" href="/anime/popular.html">
-      <i class="fa-solid fa-fire"></i>
-      <span class="mt-1 text-[10px]">Popular</span>
-    </a>
-
-    <a class="neek-link flex flex-col items-center" href="/anime/latest.html">
-      <i class="fa-solid fa-clock"></i>
-      <span class="mt-1 text-[10px]">Latest</span>
-    </a>
-
-    <a class="neek-link flex flex-col items-center" href="/anime/library.html">
-      <i class="fa-solid fa-folder"></i>
-      <span class="mt-1 text-[10px]">Library</span>
-    </a>
-
-    <!-- Search -->
-    <a class="neek-link flex flex-col items-center" href="#mobileSearchOverlay">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <span class="mt-1 text-[10px]">Search</span>
-    </a>
-
-  </nav>
-</header>
-
-<!-- Mobile Search Overlay -->
-<div id="mobileSearchOverlay" class="mobile-search-overlay">
-  <div class="mobile-search-panel">
-
-    <form action="/anime/search.html" method="get" class="w-full max-w-md mx-auto">
-      <div class="relative">
-        <input name="q" type="text" placeholder="Search anime..."
-               class="w-full rounded-xl bg-[#1a1a1a] border border-gray-700 px-4 py-3 text-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#ff4444]" />
-        <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
-      </div>
-    </form>
-
-    <div class="text-center mt-5">
-      <a href="#" class="text-sm text-gray-300 hover:text-white">
-        Close <i class="fa-solid fa-times ml-2"></i>
-      </a>
-    </div>
-
-  </div>
-</div>
-
-<style>
-:root { --accent: #ff4444; }
-
-html, body {
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-
-/* Links */
-.neek-link {
-  color: #fff;
-  text-decoration: none !important;
-}
-.neek-link:hover {
-  color: var(--accent) !important;
-}
-
-/* Mobile nav */
-.neek-mobile-nav a {
-  flex: 1;
-  text-align: center;
-  color: #fff;
-}
-
-/* Overlay */
-.mobile-search-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0,0,0,0.95);
-  backdrop-filter: blur(8px);
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.mobile-search-overlay:target {
-  display: flex;
-}
-</style>
+    <div class="line-divider"></div>
+</nav>
