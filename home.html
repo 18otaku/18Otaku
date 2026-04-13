@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18Otaku - Anime Streaming</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'accent': '#ff4444',
+                        'dark-glass': 'rgba(0, 0, 0, 0.4)',
+                        'darker-glass': 'rgba(0, 0, 0, 0.6)',
+                    },
+                    backdropBlur: {
+                        'xl': '20px',
+                        '2xl': '30px',
+                    },
+                    backgroundImage: {
+                        'gradient-to-bottom': 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8))',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            min-height: 100vh;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        .glass-hover:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .anime-poster {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            aspect-ratio: 3/4;
+        }
+        
+        .anime-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .anime-poster:hover img {
+            transform: scale(1.05);
+        }
+        
+        .anime-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            padding: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .anime-poster:hover .anime-overlay {
+            opacity: 1;
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 0.75rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #ff4444;
+        }
+
+        .line-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+
+        @supports (backdrop-filter: blur(20px)) {
+            .glass {
+                background: rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff4444;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff6666;
+        }
+    </style>
+</head>
+<body class="scroll-smooth overflow-x-hidden">
+    <!-- Header Container -->
+    <div id="header-container"></div>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-6 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6 z-10">
+                    <h1 class="text-5xl md:text-6xl font-bold text-white leading-tight">
+                        Discover Your Next <span class="text-accent">Favorite</span> Anime
+                    </h1>
+                    <p class="text-gray-400 text-lg leading-relaxed">
+                        Stream thousands of anime titles in pristine quality. Explore trending shows, latest releases, and timeless classics all in one place.
+                    </p>
+                    <div class="flex gap-4 pt-4">
+                        <button class="px-8 py-3 bg-accent text-white font-semibold rounded-lg hover:bg-opacity-90 transition transform hover:scale-105">
+                            Start Watching
+                        </button>
+                        <button class="px-8 py-3 glass glass-hover text-white font-semibold rounded-lg transition">
+                            Browse Catalog
+                        </button>
+                    </div>
+                </div>
+                <div class="relative h-96 md:h-full min-h-96">
+                    <div class="absolute inset-0 bg-gradient-to-r from-accent via-transparent to-transparent opacity-20 blur-3xl"></div>
+                    <div class="relative glass rounded-2xl overflow-hidden h-full">
+                        <div id="hero-poster" class="w-full h-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center text-gray-500">
+                            <span class="text-lg">Loading Featured Anime...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="px-6 max-w-7xl mx-auto"><div class="line-divider"></div></div>
+
+    <!-- New Releases Section -->
+    <section id="new" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-12">
+                <h2 class="section-title text-3xl md:text-4xl font-bold text-white mb-4">
+                    New Releases
+                </h2>
+                <p class="text-gray-400 mt-2">Latest episodes and new shows just added</p>
+            </div>
+
+            <div id="new-releases" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+                <!-- Skeleton Loaders -->
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="px-6 max-w-7xl mx-auto"><div class="line-divider"></div></div>
+
+    <!-- Top Airing Section -->
+    <section id="airing" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-12">
+                <h2 class="section-title text-3xl md:text-4xl font-bold text-white mb-4">
+                    Top Airing Now
+                </h2>
+                <p class="text-gray-400 mt-2">Currently airing shows trending this season</p>
+            </div>
+
+            <div id="top-airing" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+                <!-- Skeleton Loaders -->
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="px-6 max-w-7xl mx-auto"><div class="line-divider"></div></div>
+
+    <!-- Popular Selection Section -->
+    <section id="popular" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-12">
+                <h2 class="section-title text-3xl md:text-4xl font-bold text-white mb-4">
+                    Popular Selection
+                </h2>
+                <p class="text-gray-400 mt-2">All-time favorites loved by our community</p>
+            </div>
+
+            <div id="popular-selection" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+                <!-- Skeleton Loaders -->
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+                <div class="anime-poster shimmer"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="px-6 max-w-7xl mx-auto"><div class="line-divider"></div></div>
+
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+
+    <script>
+        // Load Header
+        async function loadHeader() {
+            try {
+                const response = await fetch('header.html');
+                const headerHTML = await response.text();
+                document.getElementById('header-container').innerHTML = headerHTML;
+            } catch (error) {
+                console.error('Error loading header:', error);
+            }
+        }
+
+        // Load Footer
+        async function loadFooter() {
+            try {
+                const response = await fetch('footer.html');
+                const footerHTML = await response.text();
+                document.getElementById('footer-container').innerHTML = footerHTML;
+            } catch (error) {
+                console.error('Error loading footer:', error);
+            }
+        }
+
+        // Fetch anime data from Jikan API with genre filtering
+        async function fetchAnimeData() {
+            try {
+                // MAL Genres: 9 (School), 12 (Shounen), 49 (Shoujo)
+                // New Releases - Top anime by score with specified genres
+                const newReleasesRes = await fetch('https://api.jikan.moe/v4/top/anime?filter=airing&genres=9,12,49&limit=5&page=1');
+                const newReleasesData = await newReleasesRes.json();
+                renderAnime('new-releases', newReleasesData.data);
+
+                // Top Airing - Currently airing with genres
+                const topAiringRes = await fetch('https://api.jikan.moe/v4/seasons/now?genres=9,12,49&limit=5');
+                const topAiringData = await topAiringRes.json();
+                renderAnime('top-airing', topAiringData.data);
+
+                // Popular - All time popular with genres
+                const popularRes = await fetch('https://api.jikan.moe/v4/top/anime?genres=9,12,49&limit=5&page=1');
+                const popularData = await popularRes.json();
+                renderAnime('popular-selection', popularData.data);
+
+                // Set hero poster
+                if (newReleasesData.data && newReleasesData.data.length > 0) {
+                    const hero = newReleasesData.data[0];
+                    const heroElement = document.getElementById('hero-poster');
+                    heroElement.innerHTML = `
+                        <img src="${hero.images?.jpg?.image_url || 'https://via.placeholder.com/400x500?text=Anime'}" 
+                             alt="${hero.title}" class="w-full h-full object-cover">
+                    `;
+                }
+            } catch (error) {
+                console.error('Error fetching anime data:', error);
+                document.getElementById('new-releases').innerHTML = '<p class="text-gray-400 col-span-full">Failed to load data</p>';
+            }
+        }
+
+        function renderAnime(containerId, animeList) {
+            const container = document.getElementById(containerId);
+            
+            if (!animeList || animeList.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 col-span-full">No anime found</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            animeList.forEach(anime => {
+                const posterUrl = anime.images?.jpg?.image_url || 'https://via.placeholder.com/300x400?text=Anime';
+                const animeElement = document.createElement('div');
+                animeElement.className = 'anime-poster group cursor-pointer';
+                animeElement.innerHTML = `
+                    <img src="${posterUrl}" 
+                         alt="${anime.title}" 
+                         loading="lazy"
+                         onerror="this.src='https://via.placeholder.com/300x400?text=${encodeURIComponent(anime.title)}'">
+                    <div class="anime-overlay">
+                        <h3 class="text-white font-semibold text-sm line-clamp-2 mb-2">${anime.title}</h3>
+                        <div class="flex justify-between items-center text-xs text-gray-300">
+                            <span>⭐ ${anime.score || 'N/A'}</span>
+                            <span>${anime.type || 'N/A'}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(animeElement);
+            });
+        }
+
+        // Load everything when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHeader();
+            loadFooter();
+            fetchAnimeData();
+        });
+
+        // Refresh data every 5 minutes
+        setInterval(fetchAnimeData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
