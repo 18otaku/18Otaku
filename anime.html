@@ -379,13 +379,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1rem;
         }
 
         .modal-title {
             color: white;
-            font-size: clamp(1.25rem, 5vw, 1.5rem);
+            font-size: clamp(0.9rem, 4vw, 1.5rem);
             font-weight: 700;
             flex: 1;
+            word-break: break-word;
         }
 
         .modal-close {
@@ -396,7 +398,12 @@
             cursor: pointer;
             transition: all 0.3s ease;
             flex-shrink: 0;
-            margin-left: 1rem;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .modal-close:hover {
@@ -725,14 +732,22 @@
             }
 
             .modal-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
+                padding: 0.75rem;
+                flex-wrap: wrap;
+            }
+
+            .modal-title {
+                font-size: clamp(0.85rem, 3.5vw, 1.1rem);
             }
 
             .modal-close {
-                align-self: flex-end;
-                margin-left: auto;
+                width: 28px;
+                height: 28px;
+                font-size: 1.2rem;
+            }
+
+            .modal-body {
+                padding: 0.75rem;
             }
         }
     </style>
@@ -1024,7 +1039,7 @@
 
         function playEpisode(episode) {
             const episodeInfo = parseEpisodeInfo(episode.title);
-            const title = episodeInfo ? `Episode ${episodeInfo.episode}${episodeInfo.uncensored ? ' (Uncensored)' : ''}` : 'Episode';
+            const title = episodeInfo ? `Episode ${episodeInfo.episode}${episodeInfo.uncensored ? ' (Uncen)' : ''}` : 'Episode';
             
             document.getElementById('modal-episode-title').textContent = title;
             
@@ -1217,7 +1232,7 @@
 
                 if (foundEpisode) {
                     const info = parseEpisodeInfo(foundEpisode.title);
-                    episodeBtn.textContent = info.uncensored ? `Ep ${i} (U)` : `Ep ${i}`;
+                    episodeBtn.textContent = info.uncensored ? `Ep ${i} (Uncen)` : `Ep ${i}`;
                     episodeBtn.title = info.uncensored ? `Episode ${i} (Uncensored)` : `Episode ${i}`;
                     episodeBtn.onclick = () => playEpisode(foundEpisode);
                     episodeBtn.style.cursor = 'pointer';
