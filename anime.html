@@ -279,40 +279,44 @@
         /* Episodes Section */
         .episodes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
 
         .episode-btn {
-            padding: 1rem;
+            padding: 0.75rem 0.5rem;
             background: rgba(255, 68, 68, 0.05);
-            border: 2px solid rgba(255, 68, 68, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             color: white;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .episode-btn:hover:not(:disabled) {
             background: rgba(255, 68, 68, 0.15);
-            border-color: rgba(255, 68, 68, 0.4);
+            border-color: rgba(255, 255, 255, 0.4);
             transform: translateY(-2px);
         }
 
         .episode-btn.active {
             background: rgba(255, 68, 68, 0.3);
-            border-color: #ff4444;
-            box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.2);
         }
 
         .episode-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
-            background: rgba(100, 100, 100, 0.1);
+            background: rgba(100, 100, 100, 0.05);
             border-color: rgba(100, 100, 100, 0.2);
         }
 
@@ -347,7 +351,7 @@
 
         .modal-content {
             background: rgba(0, 0, 0, 0.9);
-            border: 1px solid rgba(255, 68, 68, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px;
             width: 90%;
             max-width: 900px;
@@ -371,7 +375,7 @@
 
         .modal-header {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 68, 68, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -379,8 +383,9 @@
 
         .modal-title {
             color: white;
-            font-size: 1.5rem;
+            font-size: clamp(1.25rem, 5vw, 1.5rem);
             font-weight: 700;
+            flex: 1;
         }
 
         .modal-close {
@@ -390,6 +395,8 @@
             font-size: 1.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            flex-shrink: 0;
+            margin-left: 1rem;
         }
 
         .modal-close:hover {
@@ -421,17 +428,6 @@
             border: none;
         }
 
-        .video-link {
-            color: #ff4444;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .video-link:hover {
-            color: #ff6666;
-        }
-
         .cast-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -450,7 +446,7 @@
 
         .cast-item:hover {
             background: rgba(255, 68, 68, 0.1);
-            border-color: rgba(255, 68, 68, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .cast-image {
@@ -459,6 +455,19 @@
             object-fit: cover;
             border-radius: 6px;
             margin-bottom: 0.75rem;
+        }
+
+        .cast-placeholder {
+            width: 100%;
+            height: 150px;
+            background: rgba(255, 68, 68, 0.1);
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 68, 68, 0.5);
+            font-size: 3rem;
         }
 
         .cast-name {
@@ -593,7 +602,7 @@
             }
 
             .episodes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
             }
         }
 
@@ -657,6 +666,14 @@
                 width: 95%;
                 max-height: 95vh;
             }
+
+            .modal-header {
+                padding: 1rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -698,6 +715,11 @@
                 grid-template-columns: repeat(2, 1fr);
             }
 
+            .episode-btn {
+                font-size: 0.75rem;
+                padding: 0.5rem 0.25rem;
+            }
+
             .cast-grid {
                 grid-template-columns: 1fr;
             }
@@ -710,6 +732,7 @@
 
             .modal-close {
                 align-self: flex-end;
+                margin-left: auto;
             }
         }
     </style>
@@ -856,9 +879,6 @@
                 <div class="video-container">
                     <iframe id="video-iframe" src="" allowfullscreen="" allow="autoplay"></iframe>
                 </div>
-                <p style="text-align: center; color: rgba(255, 255, 255, 0.7);">
-                    <a href="" id="direct-link" class="video-link" target="_blank">Open in new tab</a>
-                </p>
             </div>
         </div>
     </div>
@@ -1008,10 +1028,9 @@
             
             document.getElementById('modal-episode-title').textContent = title;
             
-            // Create iframe src with hex color FF4444 converted to RGB: 255,68,68
+            // Create iframe src with RGB color: 255,68,68
             const iframeSrc = `https://streamtape.to/e/${episode.vidcode}?color=255,68,68`;
             document.getElementById('video-iframe').src = iframeSrc;
-            document.getElementById('direct-link').href = episode.link;
             
             document.getElementById('video-modal').classList.add('show');
         }
@@ -1112,16 +1131,22 @@
                     const castItem = document.createElement('div');
                     castItem.className = 'cast-item';
                     
-                    let imageHTML = '';
                     if (charImage) {
-                        imageHTML = `<img src="${charImage}" alt="${char.name?.full}" class="cast-image">`;
+                        castItem.innerHTML = `
+                            <img src="${charImage}" alt="${char.name?.full}" class="cast-image">
+                            <div class="cast-name">${char.name?.full || 'Unknown'}</div>
+                            <div class="cast-role">${voice}</div>
+                        `;
+                    } else {
+                        castItem.innerHTML = `
+                            <div class="cast-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="cast-name">${char.name?.full || 'Unknown'}</div>
+                            <div class="cast-role">${voice}</div>
+                        `;
                     }
                     
-                    castItem.innerHTML = `
-                        ${imageHTML}
-                        <div class="cast-name">${char.name?.full || 'Unknown'}</div>
-                        <div class="cast-role">${voice}</div>
-                    `;
                     castContainer.appendChild(castItem);
                 });
             } else {
@@ -1151,7 +1176,7 @@
             // Watch Now Button - scroll to episodes with offset for header
             document.getElementById('watch-btn').onclick = () => {
                 const episodesSection = document.getElementById('episodes-section');
-                const offset = 120; // Adjust based on your header height
+                const offset = 120;
                 const elementPosition = episodesSection.getBoundingClientRect().top;
                 window.scrollBy({
                     top: elementPosition - offset,
@@ -1192,11 +1217,13 @@
 
                 if (foundEpisode) {
                     const info = parseEpisodeInfo(foundEpisode.title);
-                    episodeBtn.textContent = info.uncensored ? `Ep ${i} (Uncensored)` : `Episode ${i}`;
+                    episodeBtn.textContent = info.uncensored ? `Ep ${i} (U)` : `Ep ${i}`;
+                    episodeBtn.title = info.uncensored ? `Episode ${i} (Uncensored)` : `Episode ${i}`;
                     episodeBtn.onclick = () => playEpisode(foundEpisode);
                     episodeBtn.style.cursor = 'pointer';
                 } else {
-                    episodeBtn.textContent = `Episode ${i}`;
+                    episodeBtn.textContent = `Ep ${i}`;
+                    episodeBtn.title = `Episode ${i}`;
                     episodeBtn.disabled = true;
                 }
 
