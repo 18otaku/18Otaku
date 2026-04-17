@@ -691,14 +691,15 @@
             return data?.Page?.media || [];
         }
 
-        async function getRandomHeroAnime() {
+        // Get random hero anime from recent additions ONLY
+        async function getRandomRecentAnime() {
             const query = `
                 query($genre: [String]) {
                     Page(perPage: 50) {
                         media(
                             type: ANIME
                             genre_in: $genre
-                            sort: SCORE_DESC
+                            sort: START_DATE_DESC
                             isAdult: true
                         ) {
                             id
@@ -713,6 +714,7 @@
 
             const data = await queryAniList(query, { genre: TARGET_GENRES });
             const list = data?.Page?.media || [];
+            console.log('✅ Recent anime available:', list.length);
             return list.length ? list[Math.floor(Math.random() * Math.min(list.length, 20))] : null;
         }
 
@@ -751,8 +753,11 @@
             loadHeader();
             loadFooter();
 
-            const hero = await getRandomHeroAnime();
+            // Get random hero anime from recent additions
+            const hero = await getRandomRecentAnime();
             if (hero) {
+                console.log('🎬 Hero anime:', hero.title.romaji);
+                
                 // Use bannerImage from AniList (highest resolution)
                 const bannerUrl = hero.bannerImage || hero.coverImage?.large;
                 if (bannerUrl) {
@@ -767,7 +772,7 @@
                     `;
                 }
 
-                // Updated link to /anime.html
+                // Link to anime.html
                 document.getElementById('hero-watch-btn').href = `/anime.html?mal_id=${hero.idMal}`;
             }
 
