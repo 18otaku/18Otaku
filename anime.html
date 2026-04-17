@@ -453,6 +453,14 @@
             border-color: rgba(255, 68, 68, 0.3);
         }
 
+        .cast-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+        }
+
         .cast-name {
             font-weight: 600;
             font-size: 0.9rem;
@@ -773,7 +781,7 @@
                 </div>
 
                 <!-- Episodes -->
-                <div class="content-section">
+                <div class="content-section" id="episodes-section">
                     <h2 class="section-title"><i class="fas fa-list"></i> Episodes</h2>
                     <div class="episodes-grid" id="anime-episodes-list"></div>
                 </div>
@@ -935,6 +943,7 @@
                                         full
                                     }
                                     image {
+                                        large
                                         medium
                                     }
                                 }
@@ -999,8 +1008,8 @@
             
             document.getElementById('modal-episode-title').textContent = title;
             
-            // Create iframe src for StreamTape
-            const iframeSrc = `https://streamtape.com/e/${episode.vidcode}/`;
+            // Create iframe src with hex color FF4444 converted to RGB: 255,68,68
+            const iframeSrc = `https://streamtape.to/e/${episode.vidcode}?color=255,68,68`;
             document.getElementById('video-iframe').src = iframeSrc;
             document.getElementById('direct-link').href = episode.link;
             
@@ -1098,10 +1107,18 @@
                 animeData.characters.edges.forEach(edge => {
                     const char = edge.node;
                     const voice = edge.voiceActors?.[0]?.name?.full || 'Voice Actor';
+                    const charImage = char.image?.large || char.image?.medium;
                     
                     const castItem = document.createElement('div');
                     castItem.className = 'cast-item';
+                    
+                    let imageHTML = '';
+                    if (charImage) {
+                        imageHTML = `<img src="${charImage}" alt="${char.name?.full}" class="cast-image">`;
+                    }
+                    
                     castItem.innerHTML = `
+                        ${imageHTML}
                         <div class="cast-name">${char.name?.full || 'Unknown'}</div>
                         <div class="cast-role">${voice}</div>
                     `;
@@ -1131,9 +1148,15 @@
                 document.getElementById('rating-bar').style.width = `${animeData.averageScore}%`;
             }
 
-            // Watch Now Button
+            // Watch Now Button - scroll to episodes with offset for header
             document.getElementById('watch-btn').onclick = () => {
-                document.getElementById('anime-episodes-list').scrollIntoView({ behavior: 'smooth' });
+                const episodesSection = document.getElementById('episodes-section');
+                const offset = 120; // Adjust based on your header height
+                const elementPosition = episodesSection.getBoundingClientRect().top;
+                window.scrollBy({
+                    top: elementPosition - offset,
+                    behavior: 'smooth'
+                });
             };
         }
 
@@ -1141,15 +1164,23 @@
             const container = document.getElementById('anime-episodes-list');
             container.innerHTML = '';
 
-            const totalEpisodes = animeData.episodes || 0;
-
-            if (totalEpisodes === 0) {
+            // Show episodes based on JSON data, not AniList episode count
+            if (episodesData.length === 0) {
                 container.innerHTML = '<div class="no-data">No episodes available</div>';
                 return;
             }
 
+            // Get max episode number from data
+            let maxEpisode = 0;
+            episodesData.forEach(ep => {
+                const info = parseEpisodeInfo(ep.title);
+                if (info && info.episode > maxEpisode) {
+                    maxEpisode = info.episode;
+                }
+            });
+
             // Create buttons for all episodes
-            for (let i = 1; i <= totalEpisodes; i++) {
+            for (let i = 1; i <= maxEpisode; i++) {
                 const episodeBtn = document.createElement('button');
                 episodeBtn.className = 'episode-btn';
                 
@@ -1167,7 +1198,6 @@
                 } else {
                     episodeBtn.textContent = `Episode ${i}`;
                     episodeBtn.disabled = true;
-                    episodeBtn.style.opacity = '0.4';
                 }
 
                 container.appendChild(episodeBtn);
