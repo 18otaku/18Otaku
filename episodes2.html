@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18Otaku - All Episodes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'accent': '#ff4444',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .line-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff4444;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff6666;
+        }
+
+        /* Header Section */
+        .episodes-header {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: #000;
+            overflow: hidden;
+            margin-top: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .episodes-header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #ff4444 0%, #ff6666 100%);
+            opacity: 0.1;
+        }
+
+        .episodes-header-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%);
+            z-index: 5;
+        }
+
+        .episodes-header-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            color: white;
+        }
+
+        .episodes-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .episodes-count {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Controls Section */
+        .episodes-controls {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 2rem 1rem 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #ff4444;
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .search-clear:hover {
+            color: #ff4444;
+        }
+
+        .search-box input:not(:placeholder-shown) ~ .search-clear {
+            display: block;
+        }
+
+        /* Filter & Sort Dropdowns */
+        .filter-sort-container {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-btn {
+            padding: 0.75rem 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #ff4444;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 100;
+            min-width: 200px;
+            display: none;
+            animation: slideDown 0.2s ease;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1.25rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        .dropdown-item.active {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+
+        .dropdown-item i {
+            font-size: 0.9rem;
+        }
+
+        /* Content Section */
+        .episodes-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem 2rem 3rem 2rem;
+        }
+
+        .episodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        /* Episode Card */
+        .episode-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            aspect-ratio: 2 / 3;
+            background: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .episode-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 68, 68, 0.2);
+        }
+
+        .episode-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+            opacity: 0;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .episode-card:hover img {
+            transform: scale(1.1);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Badge - Uncensored */
+        .uncensored-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            background: #22c55e;
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            z-index: 20;
+        }
+
+        /* Release Date - Top Right */
+        .release-date {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: rgba(0, 0, 0, 0.6);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Episode Info - Bottom */
+        .episode-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            padding: 1.5rem;
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100%;
+        }
+
+        .episode-title {
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            line-height: 1.3;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .episode-number {
+            color: #ff4444;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* Loading Skeleton */
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* No Results */
+        .no-data {
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.1rem;
+            grid-column: 1 / -1;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            padding: 0.6rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: rgba(255, 68, 68, 0.15);
+            border-color: #ff4444;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.active {
+            background: #ff4444;
+            border-color: #ff4444;
+        }
+
+        .pagination-info {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            padding: 0 1rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .modal-title {
+            color: white;
+            font-size: clamp(0.9rem, 4vw, 1.5rem);
+            font-weight: 700;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #ff4444;
+            transform: scale(1.2);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .episodes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .episodes-controls {
+                padding: 1.5rem 1rem 1rem 1rem;
+            }
+
+            .episodes-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .episodes-header {
+                height: 250px;
+            }
+
+            .episodes-title {
+                font-size: 1.75rem;
+            }
+
+            .episodes-count {
+                font-size: 0.9rem;
+            }
+
+            .episodes-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                min-width: unset;
+            }
+
+            .filter-sort-container {
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .episodes-content {
+                padding: 1rem 1rem 2rem 1rem;
+            }
+
+            .episodes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 1rem;
+            }
+
+            .episode-info {
+                padding: 1rem;
+            }
+
+            .episode-title {
+                font-size: 0.9rem;
+            }
+
+            .episode-number {
+                font-size: 0.8rem;
+            }
+
+            .uncensored-badge {
+                font-size: 0.6rem;
+                padding: 0.25rem 0.5rem;
+                top: 0.5rem;
+                left: 0.5rem;
+            }
+
+            .release-date {
+                font-size: 0.6rem;
+                padding: 0.25rem 0.5rem;
+                top: 0.5rem;
+                right: 0.5rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 95vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .episodes-header {
+                height: 200px;
+            }
+
+            .episodes-title {
+                font-size: 1.5rem;
+            }
+
+            .episodes-count {
+                font-size: 0.85rem;
+            }
+
+            .episodes-content {
+                padding: 1rem 0.75rem 2rem 0.75rem;
+            }
+
+            .episodes-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+
+            .episode-card {
+                aspect-ratio: 2 / 3;
+            }
+
+            .episode-info {
+                padding: 0.8rem;
+            }
+
+            .episode-title {
+                font-size: 0.75rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .episode-number {
+                font-size: 0.7rem;
+            }
+
+            .search-box input {
+                font-size: 0.9rem;
+            }
+
+            .filter-sort-container {
+                grid-template-columns: 1fr;
+            }
+
+            .dropdown-btn {
+                font-size: 0.85rem;
+                padding: 0.65rem 1rem;
+            }
+
+            .modal-header {
+                padding: 0.75rem;
+            }
+
+            .modal-body {
+                padding: 0.75rem;
+            }
+
+            .pagination-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body class="scroll-smooth">
+    <!-- Header Container -->
+    <div id="header-container"></div>
+
+    <!-- Episodes Header -->
+    <section class="episodes-header">
+        <div class="episodes-header-bg"></div>
+        <div class="episodes-header-overlay"></div>
+        <div class="episodes-header-content">
+            <div>
+                <h1 class="episodes-title">All Episodes</h1>
+                <p class="episodes-count"><span id="episodes-count">0</span> Episodes</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="px-6 max-w-7xl mx-auto"><div class="line-divider"></div></div>
+
+    <!-- Episodes Controls -->
+    <div class="episodes-controls">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input 
+                type="text" 
+                id="search-input" 
+                placeholder="Search by anime name..."
+            >
+            <button class="search-clear" onclick="clearSearch()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="filter-sort-container">
+            <div class="dropdown">
+                <button class="dropdown-btn" id="filter-btn">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <div class="dropdown-menu" id="filter-menu">
+                    <div class="dropdown-item active" data-filter="all" onclick="filterEpisodes('all')">
+                        <i class="fas fa-list"></i> All Episodes
+                    </div>
+                    <div class="dropdown-item" data-filter="censored" onclick="filterEpisodes('censored')">
+                        <i class="fas fa-eye-slash"></i> Censored
+                    </div>
+                    <div class="dropdown-item" data-filter="uncensored" onclick="filterEpisodes('uncensored')">
+                        <i class="fas fa-eye"></i> Uncensored
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropdown-btn" id="sort-btn">
+                    <i class="fas fa-sort"></i> Sort
+                </button>
+                <div class="dropdown-menu" id="sort-menu">
+                    <div class="dropdown-item active" data-sort="latest" onclick="sortEpisodes('latest')">
+                        <i class="fas fa-calendar-alt"></i> Latest First
+                    </div>
+                    <div class="dropdown-item" data-sort="oldest" onclick="sortEpisodes('oldest')">
+                        <i class="fas fa-calendar"></i> Oldest First
+                    </div>
+                    <div class="dropdown-item" data-sort="name-asc" onclick="sortEpisodes('name-asc')">
+                        <i class="fas fa-arrow-up"></i> Name (A-Z)
+                    </div>
+                    <div class="dropdown-item" data-sort="name-desc" onclick="sortEpisodes('name-desc')">
+                        <i class="fas fa-arrow-down"></i> Name (Z-A)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-6 max-w-7xl mx-auto"><div class="line-divider"></div></div>
+
+    <!-- Episodes Content -->
+    <section class="episodes-content">
+        <div class="episodes-grid" id="episodes-grid">
+            <div class="episode-card shimmer"></div>
+            <div class="episode-card shimmer"></div>
+            <div class="episode-card shimmer"></div>
+            <div class="episode-card shimmer"></div>
+            <div class="episode-card shimmer"></div>
+            <div class="episode-card shimmer"></div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <button class="pagination-btn" id="prev-btn" onclick="previousPage()">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span class="pagination-info">
+                Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+            </span>
+            <button class="pagination-btn" id="next-btn" onclick="nextPage()">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+
+    <div class="px-6 max-w-7xl mx-auto"><div class="line-divider"></div></div>
+
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+
+    <!-- Video Modal -->
+    <div id="video-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-episode-title">Episode</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="video-container">
+                    <iframe id="video-iframe" src="" allowfullscreen="" allow="autoplay" sandbox="allow-same-origin allow-scripts allow-presentation"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EPISODES_PER_PAGE = 15;
+        let allEpisodes = [];
+        let processedEpisodes = [];
+        let filteredEpisodes = [];
+        let currentFilter = 'all';
+        let currentSort = 'latest';
+        let currentPage = 1;
+        let animeCache = {}; // Keep in memory
+
+        async function loadHeader() {
+            try {
+                const response = await fetch('header.html');
+                document.getElementById('header-container').innerHTML = await response.text();
+            } catch (error) {
+                console.error('Error loading header:', error);
+            }
+        }
+
+        async function loadFooter() {
+            try {
+                const response = await fetch('footer.html');
+                document.getElementById('footer-container').innerHTML = await response.text();
+            } catch (error) {
+                console.error('Error loading footer:', error);
+            }
+        }
+
+        function parseEpisodeInfo(title) {
+            const match = title.match(/\[(\d+)-(\d+)\]\s*\[(.+?)\]\s*\[(.+?)\](?:\s*\[(.+?)\])?/);
+            if (match) {
+                return {
+                    mal_id: match[1],
+                    episode: parseInt(match[2]),
+                    anime_title: match[3],
+                    date: match[4],
+                    uncensored: match[5] === 'Uncen'
+                };
+            }
+            return null;
+        }
+
+        function formatDate(dateStr) {
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        async function getAniListImage(malId) {
+            // Check cache first
+            if (animeCache[malId]) {
+                return animeCache[malId];
+            }
+
+            try {
+                const response = await fetch('https://graphql.anilist.co', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: `
+                            query($malId: Int) {
+                                Media(idMal: $malId, type: ANIME) {
+                                    id
+                                    title { 
+                                        english
+                                        romaji
+                                    }
+                                    coverImage {
+                                        large
+                                        medium
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            malId: parseInt(malId)
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.data && data.data.Media) {
+                    const anime = data.data.Media;
+                    const imageUrl = anime.coverImage?.large || anime.coverImage?.medium;
+                    const result = {
+                        image: imageUrl,
+                        english: anime.title?.english
+                    };
+                    animeCache[malId] = result;
+                    return result;
+                }
+                return null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        async function fetchAllEpisodes() {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/18otaku/streamtape-json/main/ha.json');
+                const data = await response.json();
+                return data.files || [];
+            } catch (error) {
+                console.error('Error fetching episodes:', error);
+                return [];
+            }
+        }
+
+        function playEpisode(episode) {
+            const episodeInfo = episode.info;
+            const title = `${episodeInfo.anime_title} - EP ${String(episodeInfo.episode).padStart(2, '0')}${episodeInfo.uncensored ? ' - Uncen' : ''}`;
+            
+            document.getElementById('modal-episode-title').textContent = title;
+            
+            const iframeSrc = `https://streamtape.to/e/${episode.vidcode}?color=255,68,68&disableads=1`;
+            document.getElementById('video-iframe').src = iframeSrc;
+            
+            document.getElementById('video-modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('video-modal').classList.remove('show');
+            document.getElementById('video-iframe').src = '';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('video-modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        function filterEpisodes(filter) {
+            currentFilter = filter;
+            currentPage = 1;
+            
+            document.querySelectorAll('#filter-menu .dropdown-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`#filter-menu [data-filter="${filter}"]`).classList.add('active');
+            
+            closeDropdown('filter-menu');
+            applyFiltersAndSort();
+        }
+
+        function sortEpisodes(sort) {
+            currentSort = sort;
+            currentPage = 1;
+            
+            document.querySelectorAll('#sort-menu .dropdown-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`#sort-menu [data-sort="${sort}"]`).classList.add('active');
+            
+            closeDropdown('sort-menu');
+            applyFiltersAndSort();
+        }
+
+        function applyFiltersAndSort() {
+            let results = [...processedEpisodes];
+
+            // Apply filter
+            if (currentFilter === 'censored') {
+                results = results.filter(ep => !ep.info.uncensored);
+            } else if (currentFilter === 'uncensored') {
+                results = results.filter(ep => ep.info.uncensored);
+            }
+
+            // Apply search
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            if (searchTerm) {
+                results = results.filter(ep => {
+                    const info = ep.info;
+                    const englishName = ep.englishName || '';
+                    return (
+                        info.anime_title.toLowerCase().includes(searchTerm) ||
+                        englishName.toLowerCase().includes(searchTerm) ||
+                        info.episode.toString().includes(searchTerm)
+                    );
+                });
+            }
+
+            // Apply sort
+            results.sort((a, b) => {
+                const infoA = a.info;
+                const infoB = b.info;
+
+                if (currentSort === 'latest') {
+                    const dateCompare = new Date(infoB.date) - new Date(infoA.date);
+                    if (dateCompare !== 0) return dateCompare;
+                    return infoB.episode - infoA.episode;
+                } else if (currentSort === 'oldest') {
+                    const dateCompare = new Date(infoA.date) - new Date(infoB.date);
+                    if (dateCompare !== 0) return dateCompare;
+                    return infoA.episode - infoB.episode;
+                } else if (currentSort === 'name-asc') {
+                    const nameCompare = infoA.anime_title.localeCompare(infoB.anime_title);
+                    if (nameCompare !== 0) return nameCompare;
+                    return infoA.episode - infoB.episode;
+                } else if (currentSort === 'name-desc') {
+                    const nameCompare = infoB.anime_title.localeCompare(infoA.anime_title);
+                    if (nameCompare !== 0) return nameCompare;
+                    return infoB.episode - infoA.episode;
+                }
+            });
+
+            filteredEpisodes = results;
+            currentPage = 1;
+            updatePagination();
+            renderPage();
+        }
+
+        function updatePagination() {
+            const totalPages = Math.max(1, Math.ceil(filteredEpisodes.length / EPISODES_PER_PAGE));
+            document.getElementById('total-pages').textContent = totalPages;
+            document.getElementById('current-page').textContent = currentPage;
+            
+            document.getElementById('prev-btn').disabled = currentPage === 1;
+            document.getElementById('next-btn').disabled = currentPage === totalPages;
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage();
+                updatePagination();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.max(1, Math.ceil(filteredEpisodes.length / EPISODES_PER_PAGE));
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPage();
+                updatePagination();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function renderPage() {
+            const start = (currentPage - 1) * EPISODES_PER_PAGE;
+            const end = start + EPISODES_PER_PAGE;
+            const pageEpisodes = filteredEpisodes.slice(start, end);
+            renderEpisodes(pageEpisodes);
+        }
+
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            applyFiltersAndSort();
+        }
+
+        function toggleDropdown(id) {
+            const menu = document.getElementById(id);
+            menu.classList.toggle('show');
+        }
+
+        function closeDropdown(id) {
+            const menu = document.getElementById(id);
+            menu.classList.remove('show');
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown')) {
+                closeDropdown('filter-menu');
+                closeDropdown('sort-menu');
+            }
+        });
+
+        document.getElementById('filter-btn').addEventListener('click', () => toggleDropdown('filter-menu'));
+        document.getElementById('sort-btn').addEventListener('click', () => toggleDropdown('sort-menu'));
+        document.getElementById('search-input').addEventListener('input', applyFiltersAndSort);
+
+        async function init() {
+            loadHeader();
+            loadFooter();
+
+            allEpisodes = await fetchAllEpisodes();
+            console.log(`📹 Total episodes: ${allEpisodes.length}`);
+
+            if (allEpisodes.length === 0) {
+                document.getElementById('episodes-grid').innerHTML = '<div class="no-data">No episodes available</div>';
+                return;
+            }
+
+            // Get unique MAL IDs
+            const uniqueMalIds = [...new Set(allEpisodes.map(ep => {
+                const info = parseEpisodeInfo(ep.title);
+                return info?.mal_id;
+            }).filter(Boolean))];
+
+            console.log(`🎌 Unique anime: ${uniqueMalIds.length}`);
+
+            // Process episodes FIRST (without waiting for images)
+            processedEpisodes = allEpisodes.map(ep => {
+                const info = parseEpisodeInfo(ep.title);
+                if (!info) return null;
+
+                return {
+                    ...ep,
+                    info,
+                    englishName: '',
+                    posterUrl: 'https://via.placeholder.com/300x450?text=Loading'
+                };
+            }).filter(Boolean);
+
+            console.log(`✅ Processed: ${processedEpisodes.length}`);
+
+            document.getElementById('episodes-count').textContent = processedEpisodes.length;
+            document.title = 'All Episodes - 18Otaku';
+
+            // Show page first
+            applyFiltersAndSort();
+
+            // Fetch images in background (only what we need)
+            fetchImagesForCurrentPage();
+        }
+
+        async function fetchImagesForCurrentPage() {
+            // Get MAL IDs for current page
+            const start = (currentPage - 1) * EPISODES_PER_PAGE;
+            const end = start + EPISODES_PER_PAGE;
+            const pageEpisodes = filteredEpisodes.slice(start, end);
+            
+            const malIdsToFetch = [...new Set(pageEpisodes.map(ep => ep.info.mal_id))];
+            
+            for (const malId of malIdsToFetch) {
+                if (!animeCache[malId]) {
+                    const result = await getAniListImage(malId);
+                    if (result) {
+                        // Update all episodes with this MAL ID
+                        processedEpisodes.forEach(ep => {
+                            if (ep.info.mal_id === malId) {
+                                ep.posterUrl = result.image;
+                                ep.englishName = result.english;
+                            }
+                        });
+                    }
+                }
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+            
+            // Re-render current page with updated images
+            renderPage();
+        }
+
+        async function renderEpisodes(episodes) {
+            const container = document.getElementById('episodes-grid');
+            container.innerHTML = '';
+
+            if (episodes.length === 0) {
+                container.innerHTML = '<div class="no-data">No episodes found matching your criteria</div>';
+                return;
+            }
+
+            episodes.forEach(episode => {
+                const info = episode.info;
+                const card = document.createElement('div');
+                card.className = 'episode-card';
+                
+                const uncenseredBadge = info.uncensored 
+                    ? `<div class="uncensored-badge">Uncen</div>` 
+                    : '';
+
+                const releaseDate = formatDate(info.date);
+
+                card.innerHTML = `
+                    ${uncenseredBadge}
+                    <div class="release-date">${releaseDate}</div>
+                    <img src="${episode.posterUrl}" alt="Episode ${info.episode}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                    <div class="episode-info">
+                        <div class="episode-title">${info.anime_title}</div>
+                        <div class="episode-number">Episode ${info.episode}</div>
+                    </div>
+                `;
+
+                card.onclick = () => playEpisode(episode);
+                container.appendChild(card);
+            });
+
+            // Fetch images for this page
+            fetchImagesForCurrentPage();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
