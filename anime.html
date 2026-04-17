@@ -92,6 +92,7 @@
             padding: 3rem 2rem;
             max-width: 1280px;
             margin: 0 auto;
+            width: 100%;
         }
 
         .anime-hero-left {
@@ -116,6 +117,7 @@
             box-shadow: 0 20px 60px rgba(255, 68, 68, 0.4);
             border: 2px solid rgba(255, 68, 68, 0.3);
             flex-shrink: 0;
+            background: #1a1a1a;
         }
 
         .anime-poster-large img {
@@ -172,6 +174,7 @@
             display: flex;
             gap: 1rem;
             margin-top: 2rem;
+            flex-wrap: wrap;
         }
 
         .anime-btn {
@@ -185,6 +188,7 @@
             gap: 0.5rem;
             border: none;
             cursor: pointer;
+            font-size: 1rem;
         }
 
         .anime-btn-primary {
@@ -254,6 +258,8 @@
             color: rgba(255, 255, 255, 0.85);
             line-height: 1.8;
             font-size: 1rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         .genre-tags {
@@ -355,6 +361,7 @@
         .info-value {
             color: #ff4444;
             font-weight: 600;
+            text-align: right;
         }
 
         .rating-bar {
@@ -415,6 +422,13 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #ff4444;
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
         }
 
         /* Responsive */
@@ -506,6 +520,10 @@
             .cast-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .sidebar {
+                order: -1;
+            }
         }
 
         @media (max-width: 480px) {
@@ -546,6 +564,22 @@
             .description-text {
                 font-size: 0.9rem;
             }
+
+            .anime-meta-info {
+                gap: 0.75rem;
+            }
+
+            .meta-item {
+                min-width: auto;
+            }
+
+            .meta-label {
+                font-size: 0.75rem;
+            }
+
+            .meta-value {
+                font-size: 0.9rem;
+            }
         }
 
         .shimmer {
@@ -557,6 +591,13 @@
         @keyframes shimmer {
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
+        }
+
+        .no-data {
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
         }
     </style>
 </head>
@@ -669,7 +710,7 @@
                 <div class="sidebar-card">
                     <div class="card-title">⭐ Rating</div>
                     <div class="card-content">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                             <span style="font-size: 2rem; font-weight: 700; color: #ff4444;" id="rating-score">-</span>
                             <span style="color: rgba(255,255,255,0.6);">/10</span>
                         </div>
@@ -726,7 +767,11 @@
                 });
 
                 const data = await response.json();
-                return data.errors ? null : data.data;
+                if (data.errors) {
+                    console.error('AniList errors:', data.errors);
+                    return null;
+                }
+                return data.data;
             } catch (error) {
                 console.error('AniList error:', error);
                 return null;
@@ -794,10 +839,10 @@
         }
 
         function sanitizeHTML(text) {
-            if (!text) return '';
+            if (!text) return 'No description available';
             const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+            div.innerHTML = text;
+            return div.textContent || div.innerText || '';
         }
 
         async function init() {
@@ -806,13 +851,14 @@
 
             const malId = getQueryParam('mal_id');
             if (!malId) {
-                document.getElementById('anime-title').textContent = 'Anime not found';
+                document.getElementById('anime-title').textContent = 'Error: No anime ID provided';
                 return;
             }
 
             const data = await getAnimeDetails(malId);
             if (!data?.Media) {
                 document.getElementById('anime-title').textContent = 'Anime not found';
+                document.querySelector('.anime-content').innerHTML = '<div class="error-message">Sorry, this anime could not be found.</div>';
                 return;
             }
 
@@ -822,35 +868,46 @@
             // Hero Section
             if (anime.bannerImage) {
                 document.getElementById('anime-hero-bg').style.backgroundImage = `url('${anime.bannerImage}')`;
+            } else if (anime.coverImage?.large) {
+                document.getElementById('anime-hero-bg').style.backgroundImage = `url('${anime.coverImage.large}')`;
             }
 
-            document.getElementById('anime-poster').src = anime.coverImage?.large || anime.coverImage?.medium;
+            const posterUrl = anime.coverImage?.large || anime.coverImage?.medium;
+            if (posterUrl) {
+                document.getElementById('anime-poster').src = posterUrl;
+            }
             
-            const title = anime.title.romaji || anime.title.english || anime.title.native;
+            const title = anime.title.romaji || anime.title.english || anime.title.native || 'Unknown';
             document.getElementById('anime-title').textContent = title;
-            document.getElementById('anime-subtitle').textContent = anime.title.english || anime.title.native || '';
+            document.title = `${title} - 18Otaku`;
+            
+            const subtitle = anime.title.english || anime.title.native;
+            if (subtitle && subtitle !== title) {
+                document.getElementById('anime-subtitle').textContent = subtitle;
+            }
             
             const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : 'N/A';
             document.getElementById('anime-score').textContent = score;
-            document.getElementById('anime-episodes').textContent = anime.episodes || '-';
-            document.getElementById('anime-status').textContent = anime.status || '-';
+            document.getElementById('anime-episodes').textContent = anime.episodes || 'Unknown';
+            document.getElementById('anime-status').textContent = (anime.status || 'Unknown').replace(/_/g, ' ');
             document.getElementById('anime-type').textContent = anime.type || '-';
 
             // Description
-            document.getElementById('anime-description').textContent = anime.description 
-                ? sanitizeHTML(anime.description).replace(/<[^>]*>/g, '').substring(0, 500) + '...'
-                : 'No description available';
+            const description = sanitizeHTML(anime.description);
+            document.getElementById('anime-description').textContent = description.substring(0, 800) + (description.length > 800 ? '...' : '');
 
             // Genres
             const genresContainer = document.getElementById('anime-genres');
             genresContainer.innerHTML = '';
             if (anime.genres && anime.genres.length > 0) {
-                anime.genres.slice(0, 8).forEach(genre => {
+                anime.genres.slice(0, 12).forEach(genre => {
                     const tag = document.createElement('span');
                     tag.className = 'genre-tag';
                     tag.textContent = genre;
                     genresContainer.appendChild(tag);
                 });
+            } else {
+                genresContainer.innerHTML = '<span class="no-data">No genres available</span>';
             }
 
             // Characters
@@ -859,7 +916,7 @@
             if (anime.characters?.edges && anime.characters.edges.length > 0) {
                 anime.characters.edges.forEach(edge => {
                     const char = edge.node;
-                    const voice = edge.voiceActors?.[0]?.name?.full || 'Unknown';
+                    const voice = edge.voiceActors?.[0]?.name?.full || 'Voice Actor';
                     
                     const castItem = document.createElement('div');
                     castItem.className = 'cast-item';
@@ -869,14 +926,23 @@
                     `;
                     castContainer.appendChild(castItem);
                 });
+            } else {
+                castContainer.innerHTML = '<div class="no-data">No cast information available</div>';
             }
 
             // Sidebar Info
             document.getElementById('info-year').textContent = anime.seasonYear || '-';
-            document.getElementById('info-season').textContent = anime.season ? anime.season.charAt(0).toUpperCase() + anime.season.slice(1).toLowerCase() : '-';
+            
+            let seasonText = '-';
+            if (anime.season) {
+                const seasonMap = { 'WINTER': 'Winter', 'SPRING': 'Spring', 'SUMMER': 'Summer', 'FALL': 'Fall' };
+                seasonText = seasonMap[anime.season] || anime.season;
+            }
+            document.getElementById('info-season').textContent = seasonText;
+            
             document.getElementById('info-studio').textContent = anime.studios?.nodes?.[0]?.name || '-';
-            document.getElementById('info-source').textContent = anime.source || '-';
-            document.getElementById('info-popularity').textContent = `#${anime.popularity || '-'}`;
+            document.getElementById('info-source').textContent = (anime.source || '-').replace(/_/g, ' ');
+            document.getElementById('info-popularity').textContent = anime.popularity ? `#${anime.popularity}` : '-';
 
             // Rating
             document.getElementById('rating-score').textContent = score;
@@ -884,29 +950,34 @@
                 document.getElementById('rating-bar').style.width = `${anime.averageScore}%`;
             }
 
-            // Episodes List (Mock)
+            // Episodes List
             const episodesList = document.getElementById('episodes-list');
             episodesList.innerHTML = '';
             const episodeCount = anime.episodes || 12;
-            for (let i = 1; i <= Math.min(episodeCount, 12); i++) {
-                const episodeItem = document.createElement('div');
-                episodeItem.className = 'episode-item' + (i === 1 ? ' active' : '');
-                episodeItem.textContent = `Episode ${i}`;
-                episodeItem.style.cursor = 'pointer';
-                episodeItem.onclick = () => {
-                    document.querySelectorAll('.episode-item').forEach(e => e.classList.remove('active'));
-                    episodeItem.classList.add('active');
-                };
-                episodesList.appendChild(episodeItem);
+            
+            if (episodeCount > 0) {
+                for (let i = 1; i <= Math.min(episodeCount, 50); i++) {
+                    const episodeItem = document.createElement('div');
+                    episodeItem.className = 'episode-item' + (i === 1 ? ' active' : '');
+                    episodeItem.textContent = `Episode ${i}`;
+                    episodeItem.onclick = () => {
+                        document.querySelectorAll('.episode-item').forEach(e => e.classList.remove('active'));
+                        episodeItem.classList.add('active');
+                        console.log(`Selected: Episode ${i}`);
+                    };
+                    episodesList.appendChild(episodeItem);
+                }
+            } else {
+                episodesList.innerHTML = '<div class="no-data">Episode information not available</div>';
             }
 
             // Buttons
             document.getElementById('watch-btn').onclick = () => {
-                alert('Video player would open here for Episode 1');
+                alert(`▶ Video player would open for "${title}" - Episode 1\n\n(Feature coming soon)`);
             };
 
             document.getElementById('add-to-list-btn').onclick = () => {
-                alert(`Added "${title}" to your list!`);
+                alert(`✓ Added "${title}" to your list!\n\n(Feature coming soon)`);
             };
         }
 
