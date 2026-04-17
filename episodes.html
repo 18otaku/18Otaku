@@ -271,8 +271,8 @@
 
         .episodes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
             width: 100%;
             margin-bottom: 2rem;
         }
@@ -308,13 +308,13 @@
         /* Badge - Uncensored */
         .uncensored-badge {
             position: absolute;
-            top: 0.5rem;
-            left: 0.5rem;
+            top: 0.75rem;
+            left: 0.75rem;
             background: #22c55e;
             color: white;
-            padding: 0.25rem 0.6rem;
-            border-radius: 3px;
-            font-size: 0.65rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.3px;
@@ -324,13 +324,13 @@
         /* Release Date - Top Right */
         .release-date {
             position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
+            top: 0.75rem;
+            right: 0.75rem;
             background: rgba(0, 0, 0, 0.6);
             color: rgba(255, 255, 255, 0.8);
-            padding: 0.25rem 0.6rem;
-            border-radius: 3px;
-            font-size: 0.65rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
             z-index: 20;
             backdrop-filter: blur(10px);
         }
@@ -342,7 +342,7 @@
             left: 0;
             right: 0;
             background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
-            padding: 1rem;
+            padding: 1.5rem;
             z-index: 15;
             display: flex;
             flex-direction: column;
@@ -353,9 +353,9 @@
         .episode-title {
             color: white;
             font-weight: 600;
-            font-size: 0.85rem;
-            line-height: 1.2;
-            margin-bottom: 0.3rem;
+            font-size: 1rem;
+            line-height: 1.3;
+            margin-bottom: 0.5rem;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -365,7 +365,7 @@
         .episode-number {
             color: #ff4444;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
 
         /* Loading Skeleton */
@@ -547,8 +547,8 @@
         /* Responsive */
         @media (max-width: 1024px) {
             .episodes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-                gap: 1rem;
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 1.5rem;
             }
 
             .episodes-controls {
@@ -593,34 +593,34 @@
             }
 
             .episodes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-                gap: 0.75rem;
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 1rem;
             }
 
             .episode-info {
-                padding: 0.75rem;
+                padding: 1rem;
             }
 
             .episode-title {
-                font-size: 0.75rem;
+                font-size: 0.9rem;
             }
 
             .episode-number {
-                font-size: 0.7rem;
+                font-size: 0.8rem;
             }
 
             .uncensored-badge {
-                font-size: 0.55rem;
-                padding: 0.2rem 0.4rem;
-                top: 0.4rem;
-                left: 0.4rem;
+                font-size: 0.6rem;
+                padding: 0.25rem 0.5rem;
+                top: 0.5rem;
+                left: 0.5rem;
             }
 
             .release-date {
-                font-size: 0.55rem;
-                padding: 0.2rem 0.4rem;
-                top: 0.4rem;
-                right: 0.4rem;
+                font-size: 0.6rem;
+                padding: 0.25rem 0.5rem;
+                top: 0.5rem;
+                right: 0.5rem;
             }
 
             .modal-content {
@@ -648,7 +648,7 @@
 
             .episodes-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 0.5rem;
+                gap: 0.75rem;
             }
 
             .episode-card {
@@ -656,16 +656,16 @@
             }
 
             .episode-info {
-                padding: 0.6rem;
+                padding: 0.8rem;
             }
 
             .episode-title {
-                font-size: 0.65rem;
-                margin-bottom: 0.2rem;
+                font-size: 0.75rem;
+                margin-bottom: 0.25rem;
             }
 
             .episode-number {
-                font-size: 0.6rem;
+                font-size: 0.7rem;
             }
 
             .search-box input {
@@ -816,7 +816,7 @@
     </div>
 
     <script>
-        const EPISODES_PER_PAGE = 20;
+        const EPISODES_PER_PAGE = 15;
         let allEpisodes = [];
         let processedEpisodes = [];
         let filteredEpisodes = [];
@@ -979,19 +979,31 @@
                 });
             }
 
-            // Apply sort
+            // Apply sort - FIXED: Sort by date then episode within same date
             results.sort((a, b) => {
                 const infoA = a.info;
                 const infoB = b.info;
 
                 if (currentSort === 'latest') {
-                    return new Date(infoB.date) - new Date(infoA.date);
+                    const dateCompare = new Date(infoB.date) - new Date(infoA.date);
+                    if (dateCompare !== 0) return dateCompare;
+                    // If same date, sort by episode DESC (higher episode first)
+                    return infoB.episode - infoA.episode;
                 } else if (currentSort === 'oldest') {
-                    return new Date(infoA.date) - new Date(infoB.date);
+                    const dateCompare = new Date(infoA.date) - new Date(infoB.date);
+                    if (dateCompare !== 0) return dateCompare;
+                    // If same date, sort by episode ASC (lower episode first)
+                    return infoA.episode - infoB.episode;
                 } else if (currentSort === 'name-asc') {
-                    return infoA.anime_title.localeCompare(infoB.anime_title);
+                    const nameCompare = infoA.anime_title.localeCompare(infoB.anime_title);
+                    if (nameCompare !== 0) return nameCompare;
+                    // If same name, sort by episode ASC
+                    return infoA.episode - infoB.episode;
                 } else if (currentSort === 'name-desc') {
-                    return infoB.anime_title.localeCompare(infoA.anime_title);
+                    const nameCompare = infoB.anime_title.localeCompare(infoA.anime_title);
+                    if (nameCompare !== 0) return nameCompare;
+                    // If same name, sort by episode DESC
+                    return infoB.episode - infoA.episode;
                 }
             });
 
