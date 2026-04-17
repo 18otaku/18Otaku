@@ -899,14 +899,13 @@
                 if (data.data && data.data.Media) {
                     const anime = data.data.Media;
                     const imageUrl = anime.coverImage?.large || anime.coverImage?.medium;
-                    console.log(`✅ MAL ID ${malId} - ${anime.title?.english || anime.title?.romaji}: ${imageUrl}`);
+                    console.log(`✅ MAL ID ${malId}: ${imageUrl}`);
                     return {
                         image: imageUrl,
                         english: anime.title?.english
                     };
                 } else if (data.errors) {
-                    console.error(`❌ Error for MAL ID ${malId}:`, data.errors);
-                    return null;
+                    console.error(`❌ Error for MAL ID ${malId}:`, data.errors[0]?.message);
                 }
                 return null;
             } catch (error) {
@@ -917,11 +916,20 @@
 
         async function fetchAllEpisodes() {
             try {
+                console.log('🔄 Fetching JSON from: https://raw.githubusercontent.com/18otaku/streamtape-json/main/ha.json');
                 const response = await fetch('https://raw.githubusercontent.com/18otaku/streamtape-json/main/ha.json');
+                
+                if (!response.ok) {
+                    console.error('❌ JSON fetch failed:', response.status, response.statusText);
+                    return [];
+                }
+                
                 const data = await response.json();
+                console.log('✅ JSON loaded:', data);
+                console.log('📊 Total files in JSON:', data.files ? data.files.length : 0);
                 return data.files || [];
             } catch (error) {
-                console.error('Error fetching episodes:', error);
+                console.error('❌ Error fetching episodes:', error);
                 return [];
             }
         }
@@ -1092,14 +1100,16 @@
         document.getElementById('search-input').addEventListener('input', applyFiltersAndSort);
 
         async function init() {
+            console.log('🚀 Starting init...');
             loadHeader();
             loadFooter();
 
             allEpisodes = await fetchAllEpisodes();
-            console.log('📹 Total episodes loaded:', allEpisodes.length);
+            console.log(`📹 Total episodes loaded: ${allEpisodes.length}`);
 
             if (allEpisodes.length === 0) {
-                document.getElementById('episodes-grid').innerHTML = '<div class="no-data">No episodes available</div>';
+                console.error('❌ NO EPISODES FOUND IN JSON!');
+                document.getElementById('episodes-grid').innerHTML = '<div class="no-data">❌ No episodes available - JSON fetch failed or empty</div>';
                 return;
             }
 
@@ -1110,6 +1120,7 @@
             }).filter(Boolean))];
 
             console.log(`🎌 Found ${uniqueMalIds.length} unique anime`);
+            console.log('MAL IDs:', uniqueMalIds.slice(0, 10)); // Show first 10
 
             // Fetch images for each anime
             const animeCache = {};
@@ -1121,6 +1132,8 @@
                 // Small delay to avoid rate limiting
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
+
+            console.log(`🖼️ Anime cache size: ${Object.keys(animeCache).length}`);
 
             // Process episodes with anime data
             processedEpisodes = allEpisodes.map(ep => {
