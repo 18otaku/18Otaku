@@ -286,6 +286,7 @@
             background: #1a1a1a;
             cursor: pointer;
             transition: all 0.3s ease;
+            min-height: 300px;
         }
 
         .episode-card:hover {
@@ -298,11 +299,15 @@
             height: 100%;
             object-fit: cover;
             display: block;
-            transition: transform 0.3s ease;
+            transition: opacity 0.3s ease;
         }
 
         .episode-card:hover img {
             transform: scale(1.1);
+        }
+
+        .episode-card img.loading {
+            display: none;
         }
 
         /* Badge - Uncensored */
@@ -865,71 +870,13 @@
             }
         }
 
-        async function getAniListImage(malId) {
-            try {
-                const response = await fetch('https://graphql.anilist.co', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        query: `
-                            query($malId: Int) {
-                                Media(idMal: $malId, type: ANIME) {
-                                    id
-                                    title { 
-                                        english
-                                        romaji
-                                    }
-                                    coverImage {
-                                        large
-                                        medium
-                                    }
-                                }
-                            }
-                        `,
-                        variables: {
-                            malId: parseInt(malId)
-                        }
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (data.data && data.data.Media) {
-                    const anime = data.data.Media;
-                    const imageUrl = anime.coverImage?.large || anime.coverImage?.medium;
-                    console.log(`✅ MAL ID ${malId}: ${imageUrl}`);
-                    return {
-                        image: imageUrl,
-                        english: anime.title?.english
-                    };
-                } else if (data.errors) {
-                    console.error(`❌ Error for MAL ID ${malId}:`, data.errors[0]?.message);
-                }
-                return null;
-            } catch (error) {
-                console.error(`❌ Failed to fetch MAL ID ${malId}:`, error);
-                return null;
-            }
-        }
-
         async function fetchAllEpisodes() {
             try {
-                console.log('🔄 Fetching JSON from: https://raw.githubusercontent.com/18otaku/streamtape-json/main/ha.json');
                 const response = await fetch('https://raw.githubusercontent.com/18otaku/streamtape-json/main/ha.json');
-                
-                if (!response.ok) {
-                    console.error('❌ JSON fetch failed:', response.status, response.statusText);
-                    return [];
-                }
-                
                 const data = await response.json();
-                console.log('✅ JSON loaded:', data);
-                console.log('📊 Total files in JSON:', data.files ? data.files.length : 0);
                 return data.files || [];
             } catch (error) {
-                console.error('❌ Error fetching episodes:', error);
+                console.error('Error fetching episodes:', error);
                 return [];
             }
         }
@@ -939,10 +886,8 @@
             const title = `${episodeInfo.anime_title} - EP ${String(episodeInfo.episode).padStart(2, '0')}${episodeInfo.uncensored ? ' - Uncen' : ''}`;
             
             document.getElementById('modal-episode-title').textContent = title;
-            
             const iframeSrc = `https://streamtape.to/e/${episode.vidcode}?color=255,68,68&disableads=1`;
             document.getElementById('video-iframe').src = iframeSrc;
-            
             document.getElementById('video-modal').classList.add('show');
         }
 
@@ -952,8 +897,7 @@
         }
 
         window.onclick = function(event) {
-            const modal = document.getElementById('video-modal');
-            if (event.target == modal) {
+            if (event.target === document.getElementById('video-modal')) {
                 closeModal();
             }
         }
@@ -966,7 +910,6 @@
                 item.classList.remove('active');
             });
             document.querySelector(`#filter-menu [data-filter="${filter}"]`).classList.add('active');
-            
             closeDropdown('filter-menu');
             applyFiltersAndSort();
         }
@@ -979,7 +922,6 @@
                 item.classList.remove('active');
             });
             document.querySelector(`#sort-menu [data-sort="${sort}"]`).classList.add('active');
-            
             closeDropdown('sort-menu');
             applyFiltersAndSort();
         }
@@ -987,28 +929,24 @@
         function applyFiltersAndSort() {
             let results = [...processedEpisodes];
 
-            // Apply filter
             if (currentFilter === 'censored') {
                 results = results.filter(ep => !ep.info.uncensored);
             } else if (currentFilter === 'uncensored') {
                 results = results.filter(ep => ep.info.uncensored);
             }
 
-            // Apply search
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
             if (searchTerm) {
                 results = results.filter(ep => {
                     const info = ep.info;
-                    const englishName = ep.englishName || '';
+                    const animeTitle = ep.anime_title || '';
                     return (
-                        info.anime_title.toLowerCase().includes(searchTerm) ||
-                        englishName.toLowerCase().includes(searchTerm) ||
+                        animeTitle.toLowerCase().includes(searchTerm) ||
                         info.episode.toString().includes(searchTerm)
                     );
                 });
             }
 
-            // Apply sort
             results.sort((a, b) => {
                 const infoA = a.info;
                 const infoB = b.info;
@@ -1022,11 +960,11 @@
                     if (dateCompare !== 0) return dateCompare;
                     return infoA.episode - infoB.episode;
                 } else if (currentSort === 'name-asc') {
-                    const nameCompare = infoA.anime_title.localeCompare(infoB.anime_title);
+                    const nameCompare = (a.anime_title || '').localeCompare(b.anime_title || '');
                     if (nameCompare !== 0) return nameCompare;
                     return infoA.episode - infoB.episode;
                 } else if (currentSort === 'name-desc') {
-                    const nameCompare = infoB.anime_title.localeCompare(infoA.anime_title);
+                    const nameCompare = (b.anime_title || '').localeCompare(a.anime_title || '');
                     if (nameCompare !== 0) return nameCompare;
                     return infoB.episode - infoA.episode;
                 }
@@ -1079,13 +1017,11 @@
         }
 
         function toggleDropdown(id) {
-            const menu = document.getElementById(id);
-            menu.classList.toggle('show');
+            document.getElementById(id).classList.toggle('show');
         }
 
         function closeDropdown(id) {
-            const menu = document.getElementById(id);
-            menu.classList.remove('show');
+            document.getElementById(id).classList.remove('show');
         }
 
         document.addEventListener('click', function(event) {
@@ -1100,58 +1036,43 @@
         document.getElementById('search-input').addEventListener('input', applyFiltersAndSort);
 
         async function init() {
-            console.log('🚀 Starting init...');
             loadHeader();
             loadFooter();
 
             allEpisodes = await fetchAllEpisodes();
-            console.log(`📹 Total episodes loaded: ${allEpisodes.length}`);
+            console.log(`📹 Episodes: ${allEpisodes.length}`);
 
             if (allEpisodes.length === 0) {
-                console.error('❌ NO EPISODES FOUND IN JSON!');
-                document.getElementById('episodes-grid').innerHTML = '<div class="no-data">❌ No episodes available - JSON fetch failed or empty</div>';
+                document.getElementById('episodes-grid').innerHTML = '<div class="no-data">No episodes available</div>';
                 return;
             }
 
-            // Get unique MAL IDs
-            const uniqueMalIds = [...new Set(allEpisodes.map(ep => {
+            // Build anime title map from episodes to avoid API calls
+            const animeTitleMap = {};
+            allEpisodes.forEach(ep => {
                 const info = parseEpisodeInfo(ep.title);
-                return info?.mal_id;
-            }).filter(Boolean))];
-
-            console.log(`🎌 Found ${uniqueMalIds.length} unique anime`);
-            console.log('MAL IDs:', uniqueMalIds.slice(0, 10)); // Show first 10
-
-            // Fetch images for each anime
-            const animeCache = {};
-            for (const malId of uniqueMalIds) {
-                const result = await getAniListImage(malId);
-                if (result) {
-                    animeCache[malId] = result;
+                if (info && !animeTitleMap[info.mal_id]) {
+                    animeTitleMap[info.mal_id] = info.anime_title;
                 }
-                // Small delay to avoid rate limiting
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
+            });
 
-            console.log(`🖼️ Anime cache size: ${Object.keys(animeCache).length}`);
-
-            // Process episodes with anime data
             processedEpisodes = allEpisodes.map(ep => {
                 const info = parseEpisodeInfo(ep.title);
                 if (!info) return null;
 
-                const animeData = animeCache[info.mal_id];
-                const posterUrl = animeData?.image || 'https://via.placeholder.com/300x450?text=No+Image';
+                // Use poster, fallback to poster_streamtape if poster is placeholder
+                let posterUrl = ep.poster || 'https://via.placeholder.com/300x450?text=No+Image';
+                if (posterUrl.includes('placeholder.com')) {
+                    posterUrl = ep.poster_streamtape || 'https://via.placeholder.com/300x450?text=No+Image';
+                }
 
                 return {
                     ...ep,
                     info,
-                    englishName: animeData?.english || '',
+                    anime_title: animeTitleMap[info.mal_id] || info.anime_title,
                     posterUrl: posterUrl
                 };
             }).filter(Boolean);
-
-            console.log(`✅ Processed ${processedEpisodes.length} episodes`);
 
             document.getElementById('episodes-count').textContent = processedEpisodes.length;
             document.title = 'All Episodes - 18Otaku';
@@ -1164,7 +1085,7 @@
             container.innerHTML = '';
 
             if (episodes.length === 0) {
-                container.innerHTML = '<div class="no-data">No episodes found matching your criteria</div>';
+                container.innerHTML = '<div class="no-data">No episodes found</div>';
                 return;
             }
 
@@ -1173,18 +1094,15 @@
                 const card = document.createElement('div');
                 card.className = 'episode-card';
                 
-                const uncenseredBadge = info.uncensored 
-                    ? `<div class="uncensored-badge">Uncen</div>` 
-                    : '';
-
+                const uncenseredBadge = info.uncensored ? `<div class="uncensored-badge">Uncen</div>` : '';
                 const releaseDate = formatDate(info.date);
 
                 card.innerHTML = `
                     ${uncenseredBadge}
                     <div class="release-date">${releaseDate}</div>
-                    <img src="${episode.posterUrl}" alt="Episode ${info.episode}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                    <img src="${episode.posterUrl}" alt="Episode ${info.episode}" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
                     <div class="episode-info">
-                        <div class="episode-title">${info.anime_title}</div>
+                        <div class="episode-title">${episode.anime_title}</div>
                         <div class="episode-number">Episode ${info.episode}</div>
                     </div>
                 `;
